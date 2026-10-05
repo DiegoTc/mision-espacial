@@ -145,6 +145,164 @@ Se inicializan caja, roja, llave, puerta, azul, batería, motor, cohete y verde;
 - `src/systems/`: reglas originales, progreso, voz y efectos.
 - `tests/`: reglas terrestres, voz, persistencia, corrupción, tiempo, lectura, orden de mundos, viajes y recompensas.
 
+## Cómo funciona el código
+
+El juego está dividido en tres partes: **lo que se dibuja**, **las reglas de las misiones** y **el progreso que se guarda**. Todo se ejecuta en el navegador. Esta explicación sirve como guía para recorrer el repositorio y entender qué archivo modificar.
+
+### Cómo se generan las imágenes
+
+El astronauta, el cohete, las cajas y las piezas no se cargan desde archivos PNG descargados. Se dibujan al iniciar el juego en [BootScene.ts](src/scenes/BootScene.ts), usando formas de Phaser. No se generan con IA.
+
+Por ejemplo, estas llamadas pintan un rectángulo verde:
+
+```ts
+g.fillStyle(0x78f0a7);
+g.fillRect(5, 4, 28, 15);
+```
+
+`fillStyle` define el color. Los argumentos de `fillRect` son posición horizontal, posición vertical, ancho y alto. Combinando rectángulos pequeños se construyen el casco, el cuerpo del astronauta, las ventanas del cohete y otros detalles.
+
+El dibujo se convierte en una **textura reutilizable**, identificada por un nombre:
+
+```ts
+g.generateTexture('button', 38, 52);
+```
+
+Después una escena puede colocar esa textura en el mundo:
+
+```ts
+this.add.image(810, 565, 'button');
+```
+
+Las texturas se generan una vez al arrancar y se reutilizan durante la partida. `pixelArt: true`, en [main.ts](src/main.ts), mantiene sus bordes definidos al escalarlas. Los sprites son dibujos estáticos; las animaciones simples se consiguen moviendo, girando o cambiando la apariencia de esos objetos mediante código.
+
+[WorldArt.ts](src/scenes/WorldArt.ts) dibuja el cielo, las estrellas y las bases. [ShipInteriorScene.ts](src/scenes/ShipInteriorScene.ts) construye la habitación y las ventanas de la nave con formas de Phaser. Los iconos de planetas del mapa son emojis dentro de la interfaz HTML.
+
+### Organización y arranque
+
+| Carpeta | Responsabilidad |
+| --- | --- |
+| `src/data/` | Instrucciones, palabras, mundos, recompensas y planes de viaje |
+| `src/scenes/` | Construir cada lugar, mostrarlo y gestionar sus interacciones |
+| `src/entities/` | El personaje y su movimiento |
+| `src/systems/` | Reglas, guardado, voz y sonido |
+| `src/ui/` | Instrucciones, feedback, controles y mute |
+| `tests/` | Comprobar reglas y persistencia |
+
+[main.ts](src/main.ts) crea el juego, configura la resolución lógica de 1280×720, activa las físicas y registra las escenas. Una **escena** es una pantalla o un lugar con comportamiento propio.
+
+Phaser llama a `create()` cuando entra en una escena: allí se construyen objetos, plataformas, controles e interfaz. Luego llama a `update()` mientras esa escena está activa: allí se consulta el movimiento y se comprueba si una acción o condición permite avanzar.
+
+El recorrido principal es:
+
+```mermaid
+flowchart LR
+    Inicio --> Tierra
+    Tierra --> NaveInicial[Nave: luces]
+    NaveInicial --> Despegue
+    Despegue --> Mapa
+    Mapa --> NaveViaje[Nave: preparar viaje]
+    NaveViaje --> Luna
+    Luna --> NaveRegreso[Nave: regreso]
+    NaveRegreso --> Mapa
+```
+
+[NameScene.ts](src/scenes/NameScene.ts) conserva su nombre histórico, pero ahora muestra los nombres fijos y el menú de continuidad; no pide escribir un nombre. [WinScene.ts](src/scenes/WinScene.ts) presenta la celebración correspondiente y permite pasar al mapa o regresar a la nave.
+
+### Movimiento, físicas e interacción
+
+[Player.ts](src/entities/Player.ts) consulta las flechas en cada actualización y modifica la velocidad horizontal. Al presionar S, comprueba que el personaje esté apoyado antes de aplicar una velocidad hacia arriba.
+
+Phaser Arcade Physics calcula la gravedad y las colisiones. Suelo, piedras y plataformas tienen cuerpos físicos. La apariencia de un objeto y su cuerpo de colisión son elementos distintos: dibujar una imagen por sí solo no la convierte en un obstáculo.
+
+En [MoonScene.ts](src/scenes/MoonScene.ts) se reduce la gravedad y se configura el salto del personaje para que permanezca más tiempo en el aire.
+
+Al presionar A, la escena comprueba la cercanía a un objeto y después evalúa si corresponde a la instrucción actual. El movimiento puede continuar libremente mientras la misión espera su condición de finalización.
+
+### Reglas de las misiones terrestres
+
+[MissionManager.ts](src/systems/MissionManager.ts) contiene las reglas del nivel terrestre, separadas del dibujo y de las físicas. Mantiene un estado pequeño:
+
+```ts
+index             // Misión actual
+key               // Tiene la llave
+doorOpen          // Puerta abierta
+batteries         // Baterías recogidas
+carryingEngine    // Transporta el motor
+installed         // Motor instalado
+won               // Nivel terminado
+```
+
+Interactuar con la caja roja durante la primera misión entrega la pieza y avanza. Interactuar con otra caja devuelve `wrong`; [GameScene.ts](src/scenes/GameScene.ts) muestra un mensaje sin quitar vidas ni puntos.
+
+`interact()` devuelve resultados como `collected`, `completed`, `installed` o `locked`. La escena utiliza ese resultado para ocultar una pieza recogida, abrir la puerta, actualizar el texto o reproducir feedback. `snapshot()` convierte el estado en datos guardables; `restore()` valida esos datos antes de reconstruir las reglas.
+
+Las instrucciones y palabras terrestres están en [missions.ts](src/data/missions.ts). Las cinco instrucciones lunares están en [lunarMissions.ts](src/data/lunarMissions.ts); sus condiciones físicas se evalúan en MoonScene.
+
+### Cómo interpreta la nave una micro-misión
+
+[shipMissions.ts](src/data/shipMissions.ts) describe los pasos mediante datos. Por ejemplo:
+
+```ts
+{
+  instruction: 'Toma la tarjeta azul.',
+  target: 'card-blue',
+  action: 'use',
+  pickup: 'card-blue',
+  targetWords: ['toma', 'tarjeta', 'azul']
+}
+```
+
+`instruction` es lo que lee el niño; `target` identifica el objeto correcto; `action` indica si debe usar A, acercarse o confirmar. `pickup` incorpora una pieza al inventario y `consume` la retira cuando se instala. También hay una pista y palabras objetivo por paso.
+
+ShipInteriorScene muestra el paso actual y espera la acción correspondiente. Cuando se cumple:
+
+1. Registra el intento y las palabras.
+2. Recoge o consume el objeto.
+3. Avanza y guarda el progreso.
+4. Muestra la siguiente instrucción.
+
+Solo al completar toda la micro-misión entrega la estrella. Los planes de viaje alternan tareas de forma determinista según los viajes ya completados. La escena es la misma para tarjeta, batería, cable, luces y asiento; cambia la configuración que está interpretando.
+
+### Guardado y estadísticas
+
+[ProgressManager.ts](src/systems/ProgressManager.ts) mantiene el estado en memoria y lo guarda como JSON en `localStorage`, bajo `reading-space-game-v1`. Conserva mundos, sesiones, estrellas, monedas, lectura, inventario y pasos pendientes.
+
+Cada entrega de recompensa tiene un identificador persistente. Por ejemplo:
+
+```text
+identificador-de-sesión:earth:0
+```
+
+`reward()` comprueba si ese identificador ya aparece en `rewardClaims`. Si ya recibió su recompensa, no vuelve a entregarla al recargar. Una sesión nueva tiene otros identificadores y puede recibir recompensas por volver a jugar.
+
+Cuando aparece una instrucción se registra la exposición a sus palabras. Completarla sin ayuda incrementa `independent`; usar H registra ayuda. En nave y Luna también se conservan estadísticas por paso, como intentos y audio. **Estos datos describen comportamiento en el juego; no comprueban automáticamente que el niño leyó o comprendió cada palabra.**
+
+### Interfaz, voz y efectos
+
+Phaser dibuja el mundo en un canvas. Las instrucciones y botones son HTML/CSS superpuestos a ese canvas, definidos en [Overlay.ts](src/ui/Overlay.ts), [InstructionBox.ts](src/ui/InstructionBox.ts) y [style.css](src/style.css). Esto permite mostrar texto grande y escalarlo junto al juego.
+
+[SpeechService.ts](src/systems/SpeechService.ts) utiliza la voz del navegador y pronuncia **Fran Santiago Fin**. El texto visual conserva **FsantigoEV**. El servicio cancela la frase anterior y puede reproducir una secuencia esperando que termine cada frase.
+
+[SoundManager.ts](src/systems/SoundManager.ts) genera efectos con osciladores de Web Audio. Define pequeñas secuencias de frecuencias para salto, recogida, misión, puerta y lanzamiento, y controla su volumen y duración. Tampoco necesita archivos de sonido. Voz y efectos respetan el mismo mute.
+
+### Dónde modificar o ampliar el juego
+
+| Cambio | Archivo de entrada |
+| --- | --- |
+| Apariencia del personaje, cohete o piezas | `src/scenes/BootScene.ts` |
+| Fondo y edificios | `src/scenes/WorldArt.ts` |
+| Texto de las misiones terrestres | `src/data/missions.ts` |
+| Reglas de las seis misiones terrestres | `src/systems/MissionManager.ts` |
+| Pasos, pistas y planes de nave | `src/data/shipMissions.ts` |
+| Instrucciones lunares | `src/data/lunarMissions.ts` |
+| Ubicación de objetos y plataformas | La escena del nivel correspondiente |
+| Orden de mundos y recompensas | `src/data/worlds.ts` |
+| Nombres visual y hablado | `src/data/player.ts` |
+| Estructura de guardado y estadísticas | `src/systems/ProgressManager.ts` |
+
+Para agregar un planeta jugable hay que definir su contenido educativo, construir su escenario e interacciones y conectar la transición de viaje. Cambiar solo `implemented` no crea el nivel: las transiciones actuales todavía conectan específicamente Tierra y Luna. Los otros mundos tienen su definición para expansión y permanecen bloqueados.
+
 ## Verificación
 
 `typecheck`, `lint`, **25 tests** y `build` pasan. Los tests realizan serialización/restauración real del estado entre instancias de ProgressManager, incluidos paso e inventario de nave, ayudas, audio, recompensas sin duplicar, checkpoints lunares y regreso al mapa con futuros destinos bloqueados.
