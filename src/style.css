@@ -1,0 +1,78 @@
+:root { font-family: 'Trebuchet MS', Arial, sans-serif; color: #fff4da; background: #0c1426; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; overflow: hidden; }
+#app { position: relative; width: min(100vw, 177.7778vh, 1600px); aspect-ratio: 16/9; container-type: inline-size; overflow: hidden; box-shadow: 0 24px 120px #0008; }
+#game, #ui { position: absolute; inset: 0; }
+#game canvas { display: block; }
+#ui { pointer-events: none; font-size: 1.25cqw; }
+button, input { pointer-events: auto; font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 3px solid #9aefce; outline-offset: 5px; }
+.topbar { position: absolute; top: 2.1cqw; left: 3cqw; right: 3cqw; display: flex; align-items: center; justify-content: space-between; }
+.brand { font-weight: 900; letter-spacing: 0.14em; font-size: 1.1cqw; display: flex; align-items: center; gap: 0.9cqw; }
+.brand-icon { color: #ffce77; font-size: 2.2cqw; }
+.top-right { display: flex; align-items: center; gap: 2cqw; }
+.level-tag { font-size: 0.82cqw; letter-spacing: .12em; color: #b4c5d4; }
+.level-tag b { padding: .5cqw .7cqw; margin-left: .6cqw; border: 1px solid #71899655; border-radius: .4cqw; color: #ffe1a6; }
+.quiet-button { border: 1px solid #8093a94d; border-radius: .65cqw; background: #16273fcc; color: #d5e5e4; padding: .65cqw 1cqw; font-size: 1cqw; }
+.welcome { position: absolute; left: 8cqw; top: 11.1cqw; width: 37cqw; }
+.eyebrow { color: #9bd6c9; font-size: .87cqw; font-weight: 800; letter-spacing: .15em; }
+h1 { font-size: 4.65cqw; line-height: 1.07; margin: 1.3cqw 0 1.4cqw; letter-spacing: -.04em; }
+.welcome > p { color: #bed1db; font-size: 1.5cqw; line-height: 1.65; margin: 0 0 2.3cqw; }
+#name-form { width: 31cqw; }
+label { display: block; font-size: 1.75cqw; font-weight: 800; margin-bottom: .9cqw; }
+input { display: block; width: 100%; padding: 1.1cqw 1.3cqw; color: #f5f3df; background: #11253b; border: 2px solid #719096; border-radius: .65cqw; font-size: 1.6cqw; }
+input::placeholder { color: #b5c5ce; }
+.form-error { display: block; color: #ffdb9d; min-height: 1.1cqw; font-size: .9cqw; margin-top: .4cqw; }
+.primary { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 1.2cqw 1.5cqw; background: #ffcf7a; color: #263446; border: 0; border-bottom: .32cqw solid #c89850; border-radius: .65cqw; font-weight: 900; letter-spacing: .06em; font-size: 1.15cqw; transition: background .15s, transform .15s; }
+.primary:hover { background: #ffdf9e; transform: translateY(-2px); }
+.primary span { font-size: 1.8cqw; line-height: .8; }
+.welcome-note { margin-top: 1.6cqw; color: #a6bccb; font-size: .88cqw; }.welcome-note span { margin: 0 .9cqw; color: #ffd286; }
+.planet-tag { position: absolute; top: 15.5cqw; right: 5.4cqw; color: #c8dcd9; font-size: .72cqw; letter-spacing: .14em; line-height: 1.9; }.planet-tag strong { font-size: 1.15cqw; letter-spacing: 0; }
+.hud { position: absolute; top: 6.4cqw; left: 3cqw; right: 3cqw; display: flex; gap: 1.4cqw; align-items: start; }
+.mission-card { flex: 1; padding: 1.2cqw 1.7cqw 1.1cqw; border: 1px solid #71879766; border-radius: 1cqw; background: #14263ef2; box-shadow: 0 .4cqw 1.5cqw #08152633; }
+.mission-top { display: flex; justify-content: space-between; align-items: center; gap: 1cqw; }
+#mission-label { font-size: .82cqw; letter-spacing: .13em; color: #9fdbce; font-weight: 800; }
+.steps { display: flex; gap: .45cqw; }.steps i { width: 1.1cqw; height: .35cqw; background: #3a4f66; border-radius: 1cqw; }.steps .current { background: #ffce7d; }.steps .done { background: #93e1bb; }
+h2 { margin: .9cqw 0 .7cqw; font-size: 2.15cqw; line-height: 1.25; letter-spacing: -.02em; }
+#feedback { font-size: 1.13cqw; color: #c4d9dd; min-height: 1.4cqw; }
+.inventory { padding: 1.2cqw 1.3cqw; width: 19.5cqw; border-radius: 1cqw; border: 1px solid #7187974d; background: #14263eea; line-height: 1.7; }
+.inventory .eyebrow { font-size: .72cqw; }#inventory { color: #ffe1a2; font-size: 1.08cqw; margin: .4cqw 0; }#batteries { color: #b8edda; font-size: 1.16cqw; border-top: 1px solid #71879744; padding-top: .4cqw; }
+footer { position: absolute; bottom: 0; left: 0; right: 0; height: 4cqw; display: flex; align-items: center; justify-content: space-between; padding: 0 3cqw; background: #111f34f5; border-top: 1px solid #58708066; color: #c2d5dd; font-size: 1.1cqw; }
+kbd { display: inline-block; min-width: 1.7cqw; text-align: center; font-family: inherit; font-weight: 800; color: #ffdf9b; border: 1px solid #657a8966; border-bottom-width: 3px; border-radius: .3cqw; padding: .14cqw .33cqw; margin: 0 .25cqw 0 .8cqw; background: #20344d; }kbd:first-child { margin-left: 0; }
+mark { background: #ffcf7a; color: #21334a; border-radius: .3cqw; padding: .1cqw .25cqw; }
+.help-pulse { animation: help-pulse 1s ease-in-out 3; }@keyframes help-pulse { 50% { border-color: #ffdb91; box-shadow: 0 0 2cqw #ffcf7933; } }
+.scrim { position: absolute; inset: 0; background: #081326b8; display: grid; place-items: center; pointer-events: auto; backdrop-filter: blur(4px); }
+.pause-card { width: 36cqw; border: 1px solid #73928f; background: #172b41; padding: 3cqw; border-radius: 1.4cqw; text-align: center; }.pause-card h2 { font-size: 3cqw; }.pause-card p { color: #bfd7dc; margin-bottom: 2cqw; }
+small { display: block; font-size: .95cqw; margin-top: 1.3cqw; color: #b4cbd2; }
+.win-card { position: absolute; left: 26cqw; top: 8cqw; width: 48cqw; text-align: center; background: #14263eef; border: 1px solid #69928b77; border-radius: 1.6cqw; padding: 2cqw 4cqw 2.5cqw; box-shadow: 0 2cqw 6cqw #07142666; }
+.medal { width: 5.3cqw; height: 5.3cqw; margin: 0 auto 1.4cqw; border-radius: 50%; background: #ffce7a; color: #2b4053; display: grid; place-items: center; font-size: 3.2cqw; box-shadow: 0 0 0 .6cqw #ffce7a18; }
+.win-card h1 { font-size: 3.7cqw; margin: 1.1cqw 0; }.win-card p { color: #d0e1de; font-size: 1.6cqw; line-height: 1.65; }
+.next-mission { display: flex; align-items: center; gap: 1.2cqw; text-align: left; padding: 1.5cqw; border: 1px solid #68809866; border-radius: .8cqw; margin: 2cqw 0; background: #1d3349; }.moon-icon { font-size: 3.5cqw; color: #c1d8d2; }.next-mission h3 { font-size: 1.8cqw; margin: .3cqw 0 0; }.next-mission .eyebrow { font-size: .7cqw; }.locked { margin-left: auto; font-size: .78cqw; color: #c6d1d9; }
+@media (prefers-reduced-motion: reduce) { .help-pulse { animation: none; border-color: #ffdb91; } .primary { transition: none; } }
+.journey-welcome { top: 10cqw; width: 36cqw; }
+.journey-welcome > .player-greeting { margin-bottom: .7cqw; font-size: 1.9cqw; color: #ffe0a0; font-weight: 800; }
+.journey-welcome > p { margin-bottom: 1.5cqw; }
+.journey-welcome .primary, .journey-welcome .secondary { width: 32cqw; }
+.journey-stats { color: #b4e4d4; margin: 0 0 1.2cqw; font-size: 1.1cqw; }
+.secondary { display: block; width: 100%; margin-top: .9cqw; padding: 1cqw 1.4cqw; border: 1px solid #8db3b3; border-radius: .65cqw; color: #d8e8df; background: #182d43; font-size: 1.1cqw; font-weight: 800; letter-spacing: .05em; }
+.secondary:hover { background: #28435a; }
+.solar-map { position:absolute; top:7cqw; left:6%; width:88%; text-align:center; }
+.solar-map h1 { font-size:3.2cqw; margin:.5cqw 0; }
+.solar-map p { margin:0 0 1.3cqw; font-size:1.35cqw; color:#c3d2df; }
+.map-rewards { position:absolute; top:1cqw; right:0; font-size:1.5cqw; color:#ffe0a1; }
+.world-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:1cqw; position:relative; }
+.world-grid::before { content:''; position:absolute; top:7cqw; width:100%; border-top:3px dashed #5f8098; z-index:-1; }
+.world-card { display:flex; flex-direction:column; align-items:center; gap:.55cqw; padding:1cqw .4cqw; border:2px solid #52637d; background:#202f4b; border-radius:1.2cqw; color:#f8f2df; min-height:13cqw; font:inherit; cursor:pointer; }
+.world-card strong { font-size:1.35cqw; }
+.world-card small { font-size:1cqw; }
+.world-planet { display:grid; place-items:center; width:5cqw; height:5cqw; border-radius:50%; font-size:3.4cqw; background:radial-gradient(circle at 32% 30%,#5e7894,#182841); box-shadow:inset -8px -8px 0 #0003; }
+.world-card.locked { opacity:.65; }
+.world-card.completed { border-color:#78ccb0; }
+.world-card.available { border-color:#ffcd7d; }
+.world-card.selected, .world-card:focus-visible { outline:3px solid #f8e9b9; outline-offset:3px; transform:translateY(-3px); }
+.world-card.secret { opacity:.6; cursor:default; }
+#map-hint { margin-top:1cqw; font-size:1.3cqw; min-height:2cqw; color:#fbdca6; }
+.travel-title { position:absolute; top:14cqw; width:100%; text-align:center; font-size:3cqw; font-weight:bold; color:#f9edcf; }
+.reward-toast { color:#ffdd89; }
+.win-card h1 { font-size:3cqw; }
